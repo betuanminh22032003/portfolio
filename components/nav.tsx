@@ -24,8 +24,8 @@ export function Nav() {
             className="group flex items-center gap-2.5"
             aria-label={`${resume.name}, back to top`}
           >
-            <span className="grid size-8 place-items-center rounded-[8px] border border-line-strong bg-surface-2 font-mono text-[13px] font-semibold text-accent">
-              {initials}
+            <span className="grid size-8 place-items-center border border-line-strong bg-surface-2 font-mono text-[12px] font-semibold text-accent">
+              {initials.slice(0, 2)}
             </span>
             <span className="hidden font-mono text-sm text-muted transition-colors group-hover:text-fg sm:block">
               {resume.name.toLowerCase().replace(/\s+/g, "-")}
@@ -46,7 +46,7 @@ export function Nav() {
 
           <a
             href="#contact"
-            className="rounded-[10px] border border-accent/30 bg-accent-soft px-3.5 py-1.5 text-sm font-medium text-accent transition-colors hover:bg-accent/20"
+            className="border border-line-strong px-3.5 py-1.5 text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent"
           >
             Get in touch
           </a>
