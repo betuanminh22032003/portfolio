@@ -70,6 +70,25 @@ public/BeTuanMinh_Resume.pdf   # served by the Download CV button
 
 ## Deploy
 
-Easiest path is **Vercel**: push this folder to a Git repo, import it on
-[vercel.com/new](https://vercel.com/new), and it deploys with zero config.
-Any Node host that runs `npm run build && npm start` also works.
+### GitHub Pages
+
+This repository includes a Pages workflow at `.github/workflows/deploy-pages.yml`.
+It builds the Next.js application as static HTML into `out/` and deploys that
+artifact; GitHub Pages must **not** be configured to publish the repository root.
+
+1. Push the project to GitHub. If your default branch is not `main`, change the
+   branch in the workflow's `on.push.branches` setting.
+2. Open **Settings → Pages → Build and deployment** in the GitHub repository.
+3. Set **Source** to **GitHub Actions**. Do not choose “Deploy from a branch”.
+4. Open the **Actions** tab and run **Deploy portfolio to GitHub Pages**, or push
+   a commit to `main`.
+
+The workflow automatically supplies the repository base path, so both
+`username.github.io` repositories and project sites such as
+`username.github.io/portfolio/` work without manual path changes.
+
+### Other hosts
+
+For Vercel, import the repository at [vercel.com/new](https://vercel.com/new).
+The project is configured as a static export, so any static host can publish the
+generated `out/` directory after running `npm run build`.

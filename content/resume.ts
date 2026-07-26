@@ -66,7 +66,8 @@ export const resume = {
   email: "betuanminh22032003@gmail.com",
   phone: "0975-420-673",
   phoneHref: "+84975420673",
-  cvFile: "/BeTuanMinh_Resume.pdf",
+  // Relative URL works both at a custom domain and under /repository-name/ on GitHub Pages.
+  cvFile: "BeTuanMinh_Resume.pdf",
   current: "Backend Engineer at VTC Online",
 
   links: {
