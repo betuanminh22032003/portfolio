@@ -9,24 +9,24 @@
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
 
   /* Surfaces — off-black, never pure #000 */
-  --color-bg: #0a0b0d;
-  --color-surface: #101216;
-  --color-surface-2: #15181e;
+  --color-bg: #0c0e0c;
+  --color-surface: #111411;
+  --color-surface-2: #171a17;
 
   /* Hairlines */
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-strong: rgba(255, 255, 255, 0.14);
 
   /* Text — off-white, never pure #fff */
-  --color-fg: #e8eaef;
-  --color-muted: #9aa1ad;
-  --color-faint: #6b7280;
+  --color-fg: #eeefe9;
+  --color-muted: #a2a79e;
+  --color-faint: #737a70;
 
-  /* Primary action accent: cyan (also the first of the categorical palette) */
-  --color-accent: #38bdf8;
-  --color-accent-strong: #0ea5e9;
-  --color-accent-soft: rgba(56, 189, 248, 0.12);
-  --color-on-accent: #04232e;
+  /* Single restrained sage accent for actions and content highlights */
+  --color-accent: #9ab782;
+  --color-accent-strong: #aec998;
+  --color-accent-soft: rgba(154, 183, 130, 0.12);
+  --color-on-accent: #10150d;
 
   /* One radius system: containers 12px, tags = pill, inputs 8px */
   --radius-card: 12px;
@@ -71,16 +71,27 @@ body {
   background-image:
     radial-gradient(
       70rem 40rem at 80% -8%,
-      rgba(56, 189, 248, 0.09),
+      rgba(154, 183, 130, 0.075),
       transparent 60%
     ),
     radial-gradient(
       52rem 32rem at 5% 2%,
-      rgba(167, 139, 250, 0.06),
+      rgba(154, 183, 130, 0.025),
       transparent 55%
     );
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+.hero-orbit {
+  position: absolute;
+  width: min(48rem, 70vw);
+  aspect-ratio: 1;
+  right: -20rem;
+  top: -16rem;
+  border: 1px solid rgba(154, 183, 130, 0.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 7rem rgba(154, 183, 130, 0.018), 0 0 0 14rem rgba(154, 183, 130, 0.012);
 }
 
 /* Accessible focus ring, accent-tinted */

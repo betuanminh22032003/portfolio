@@ -1,18 +1,17 @@
 import type { CSSProperties } from "react";
 
 /**
- * The portfolio's categorical accent palette. The dark base stays neutral;
- * these colors key content by category (a focus area, a metric, a project).
- * Cyan doubles as the primary action color (see --color-accent in globals.css).
+ * Legacy category keys remain part of the content schema, but every category
+ * resolves to one restrained sage accent for a more cohesive visual identity.
  */
 export type Accent = "cyan" | "pink" | "lime" | "orange" | "violet";
 
 export const ACCENTS: Record<Accent, string> = {
-  cyan: "#38bdf8",
-  pink: "#f472b6",
-  lime: "#a3e635",
-  orange: "#fb923c",
-  violet: "#a78bfa",
+  cyan: "#9ab782",
+  pink: "#9ab782",
+  lime: "#9ab782",
+  orange: "#9ab782",
+  violet: "#9ab782",
 };
 
 /** Inline CSS var so children can reference the accent via `var(--a)`. */
