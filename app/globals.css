@@ -41,25 +41,6 @@ body {
 .hero-shell::after { position: absolute; inset: 0; pointer-events: none; content: ""; background-image: linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, black, transparent 82%); }
 .hero-aurora { position: absolute; width: 42rem; height: 42rem; right: -8rem; top: 2rem; border-radius: 999px; background: conic-gradient(from 90deg, rgba(83,231,255,.16), rgba(169,133,255,.1), rgba(255,111,125,.11), rgba(83,231,255,.16)); filter: blur(90px); opacity: .55; }
 .text-gradient { background: linear-gradient(115deg, #f1f4f7 15%, #53e7ff 55%, #a985ff 96%); background-clip: text; -webkit-background-clip: text; color: transparent; }
-.network-stage { position: relative; min-height: 32rem; overflow: hidden; border: 1px solid rgba(131,205,226,.18); border-radius: 1.25rem; background: radial-gradient(circle at 50% 48%, rgba(83,231,255,.1), transparent 35%), linear-gradient(145deg, rgba(16,20,27,.78), rgba(7,9,14,.42)); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 40px 100px rgba(0,0,0,.3), 0 0 90px rgba(83,231,255,.04); transform: perspective(1200px) rotateY(-2deg) rotateX(1deg); }
-.network-stage::before { position: absolute; inset: 0; z-index: 2; pointer-events: none; content: ""; background-image: linear-gradient(rgba(83,231,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(83,231,255,.045) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle at center, black, transparent 76%); }
-.network-fallback { position: absolute; inset: 0; transition: opacity .8s ease; }
-.mesh-lines { stroke: rgba(83,231,255,.32); stroke-width: 1; }
-.mesh-nodes circle { fill: #53e7ff; filter: drop-shadow(0 0 8px rgba(83,231,255,.8)); }
-.mesh-nodes circle:nth-child(3n+2) { fill: #ff6f7d; }
-.mesh-nodes circle:nth-child(3n) { fill: #c8ff67; }
-.mesh-nodes .mesh-core { fill: #a985ff; }
-.mesh-nodes .mesh-orbit { fill: none; stroke: rgba(169,133,255,.45); stroke-dasharray: 4 7; filter: none; }
-.network-vignette { position: absolute; inset: 0; z-index: 3; pointer-events: none; box-shadow: inset 0 0 85px 24px #090b10; }
-.network-label { position: absolute; z-index: 4; display: flex; align-items: center; gap: 7px; padding: 5px 8px; border: 1px solid rgba(255,255,255,.11); background: rgba(9,11,16,.7); color: #9da9b6; font: 10px var(--font-mono); letter-spacing: .04em; backdrop-filter: blur(8px); }
-.network-label span { width: 5px; height: 5px; border-radius: 50%; background: #53e7ff; box-shadow: 0 0 8px #53e7ff; }
-.network-label-a { left: 8%; top: 26%; }
-.network-label-b { right: 7%; top: 20%; }
-.network-label-b span { background: #ff6f7d; box-shadow: 0 0 8px #ff6f7d; }
-.network-label-c { right: 9%; bottom: 24%; }
-.network-label-c span { background: #c8ff67; box-shadow: 0 0 8px #c8ff67; }
-.network-telemetry { position: absolute; z-index: 4; inset: auto 1rem 1rem; display: flex; justify-content: space-between; gap: 1rem; color: #667383; font: 9px var(--font-mono); letter-spacing: .1em; }
-.network-telemetry span:first-child { color: #53e7ff; }
 
 .experience-row { position: relative; padding-block: 1rem; }
 .experience-row::before { position: absolute; left: -1.5rem; top: 1.2rem; bottom: 1.2rem; width: 1px; content: ""; background: linear-gradient(#53e7ff, #a985ff, transparent); opacity: .45; }
@@ -70,16 +51,11 @@ body {
 .mobile-nav[open] summary { border-color: var(--color-accent); color: var(--color-accent); }
 .mobile-nav summary::-webkit-details-marker { display: none; }
 
-@media (max-width: 1023px) { .network-stage { min-height: 29rem; transform: none; } }
 @media (max-width: 639px) {
   body { background-attachment: scroll; }
-  .network-stage { min-height: 24rem; border-radius: .9rem; }
-  .network-label { font-size: 8px; }
-  .network-label-c { display: none; }
   .experience-row::before { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .network-stage { transform: none; }
 }

@@ -1,255 +1,225 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { SystemStory } from "@/content/system-stories";
 
 type MeshStatus = "loading" | "ready" | "unavailable";
+type Props = {
+  story: SystemStory;
+  activeStep: number;
+  paused: boolean;
+  onStatus: (status: MeshStatus) => void;
+  onProject: (positions: Array<{ x: number; y: number }>) => void;
+  onSelectNode: (index: number) => void;
+};
 
-export function ServiceMeshCanvas({ onStatus }: { onStatus: (status: MeshStatus) => void }) {
+/** The models share the node order of the accessible HTML diagram. */
+export function ServiceMeshCanvas(props: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const live = useRef(props);
+  const refresh = useRef<() => void>(() => {});
+  live.current = props;
+
+  useEffect(() => { refresh.current(); }, [props.activeStep, props.paused]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     let disposed = false;
-    let frame = 0;
-    let visible = false;
-    let pageVisible = !document.hidden;
-    let contextLost = false;
     let cleanup = () => {};
+    live.current.onStatus("loading");
 
-    void import("three").then((THREE) => {
+    void import("three").then((T) => {
       if (disposed) return;
+      const renderer = new T.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
+      const scene = new T.Scene();
+      const board = new T.Group();
+      scene.add(board);
+      const camera = new T.OrthographicCamera(-5, 5, 3.5, -3.5, 0.1, 60);
+      camera.position.set(2.6, 7.8, 10);
+      camera.lookAt(0, 0.15, 0);
+      const accent = new T.Color(props.story.color);
+      const body = new T.MeshStandardMaterial({ color: 0x263d4c, roughness: 0.6, metalness: 0.25 });
+      const dark = new T.MeshStandardMaterial({ color: 0x101e29, roughness: 0.8 });
+      const trim = new T.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.25, roughness: 0.45 });
+      const screen = new T.MeshBasicMaterial({ color: 0x233f4d });
+      const box = (group: InstanceType<typeof T.Group>, w: number, h: number, d: number, x: number, y: number, z: number, material = body) => {
+        const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), material);
+        mesh.position.set(x, y, z);
+        group.add(mesh);
+        return mesh;
+      };
+      box(board, 7.4, 0.12, 5.15, 0, -0.11, 0, dark);
+      const points = [new T.Vector3(-2, 0, -1.35), new T.Vector3(2, 0, -1.35), new T.Vector3(2, 0, 1.35), new T.Vector3(-2, 0, 1.35)];
+      const nodeGroups: InstanceType<typeof T.Group>[] = [];
+      const plinths: InstanceType<typeof T.MeshStandardMaterial>[] = [];
+      const anchors: InstanceType<typeof T.Vector3>[] = [];
+      props.story.nodes.forEach((node, index) => {
+        const group = new T.Group();
+        group.position.copy(points[index]);
+        group.userData.nodeIndex = index;
+        board.add(group);
+        nodeGroups.push(group);
+        const plinth = body.clone();
+        plinths.push(plinth);
+        box(group, 1.65, 0.12, 1.25, 0, 0.02, 0, plinth);
+        if (node.kind === "client") {
+          box(group, 0.62, 0.08, 0.4, 0, 0.16, 0.1);
+          box(group, 0.1, 0.36, 0.1, 0, 0.32, 0.1);
+          box(group, 1.26, 0.8, 0.13, 0, 0.83, 0);
+          const display = new T.Mesh(new T.BoxGeometry(1.1, 0.64, 0.025), screen);
+          display.position.set(0, 0.83, 0.08); group.add(display);
+          box(group, 0.95, 0.055, 0.03, 0, 1.04, 0.105, trim);
+          [0, 1, 2].forEach((row) => box(group, 0.7 - row * 0.12, 0.035, 0.03, -0.1, 0.88 - row * 0.12, 0.105, trim));
+        } else if (node.kind === "data") {
+          for (let layer = 0; layer < 3; layer++) {
+            const drum = new T.Mesh(new T.CylinderGeometry(0.56, 0.56, 0.25, 32), body);
+            drum.position.y = 0.26 + layer * 0.3; group.add(drum);
+            const rim = new T.Mesh(new T.TorusGeometry(0.55, 0.025, 6, 32), trim);
+            rim.rotation.x = Math.PI / 2; rim.position.y = 0.39 + layer * 0.3; group.add(rim);
+          }
+        } else if (node.kind === "queue") {
+          box(group, 1.35, 0.1, 0.72, 0, 0.23, 0);
+          box(group, 1.35, 0.55, 0.08, 0, 0.48, -0.32);
+          for (let slot = 0; slot < 4; slot++) box(group, 0.06, 0.55, 0.72, -0.66 + slot * 0.44, 0.48, 0);
+          for (let slot = 0; slot < 3; slot++) {
+            const message = box(group, 0.28, 0.37, 0.12, -0.44 + slot * 0.44, 0.49, 0.04, trim);
+            message.rotation.z = -0.08;
+          }
+        } else if (node.kind === "identity") {
+          box(group, 1.04, 1.02, 0.66, 0, 0.63, 0);
+          box(group, 0.86, 0.85, 0.05, 0, 0.63, 0.36, dark);
+          const lock = new T.Mesh(new T.TorusGeometry(0.17, 0.045, 8, 24, Math.PI), trim);
+          lock.position.set(0, 0.76, 0.42); group.add(lock);
+          box(group, 0.39, 0.28, 0.1, 0, 0.62, 0.44, trim);
+          box(group, 0.045, 0.1, 0.025, 0, 0.64, 0.505, dark);
+        } else {
+          for (let slab = 0; slab < 3; slab++) {
+            box(group, 1.05, 0.22, 0.75, 0, 0.27 + slab * 0.3, 0);
+            box(group, 0.1, 0.065, 0.025, -0.34, 0.27 + slab * 0.3, 0.389, trim);
+            box(group, 0.46, 0.035, 0.025, 0.12, 0.27 + slab * 0.3, 0.389, dark);
+          }
+        }
+        anchors.push(points[index].clone().add(new T.Vector3(0, 1.62, 0)));
+      });
+      const routes = props.story.steps.map((step) => {
+        const from = props.story.nodes.findIndex((node) => node.id === step.from);
+        const to = props.story.nodes.findIndex((node) => node.id === step.to);
+        const start = points[from].clone().setY(0.13);
+        const end = points[to].clone().setY(0.13);
+        const direction = end.clone().sub(start).normalize();
+        start.addScaledVector(direction, 0.88); end.addScaledVector(direction, -0.88);
+        const curve = new T.LineCurve3(start, end);
+        const material = new T.MeshBasicMaterial({ color: 0x39515f, transparent: true, opacity: 0.4 });
+        const line = new T.Mesh(new T.TubeGeometry(curve, 1, 0.027, 6, false), material);
+        board.add(line);
+        return { curve, material, line, from, to, direction };
+      });
+      const packet = new T.Mesh(new T.BoxGeometry(0.17, 0.12, 0.17), trim);
+      board.add(packet);
+      const arrow = new T.Mesh(new T.ConeGeometry(0.12, 0.29, 3), trim);
+      board.add(arrow);
+      scene.add(new T.HemisphereLight(0xd4f2ff, 0x15212c, 2.3));
+      const key = new T.DirectionalLight(0xffffff, 2.7); key.position.set(-3, 8, 6); scene.add(key);
 
-      let renderer: InstanceType<typeof THREE.WebGLRenderer>;
-      try {
-        renderer = new THREE.WebGLRenderer({
-          canvas,
-          alpha: true,
-          antialias: true,
-          powerPreference: "high-performance",
+      let frame = 0, last = 0, elapsed = 0, visible = true, lost = false, hovered = -1;
+      const pointer = new T.Vector2();
+      const raycaster = new T.Raycaster();
+      let targetRotation = 0;
+      let previousProjection = "";
+      const draw = (time: number) => {
+        frame = 0;
+        if (disposed || lost || document.hidden || !visible) { last = 0; return; }
+        const delta = last ? Math.min((time - last) / 1000, 0.06) : 0;
+        last = time;
+        if (!live.current.paused) {
+          elapsed += delta;
+          board.rotation.y += (targetRotation - board.rotation.y) * (1 - Math.exp(-delta * 8));
+        }
+        const active = Math.max(0, Math.min(live.current.activeStep, routes.length - 1));
+        const route = routes[active];
+        routes.forEach((item, index) => {
+          const sameConnection = (item.from === route.from && item.to === route.to) || (item.from === route.to && item.to === route.from);
+          item.line.visible = index === active || !sameConnection;
+          item.material.color.set(index === active ? accent : 0x39515f);
+          item.material.opacity = index === active ? 1 : 0.35;
         });
-      } catch {
-        onStatus("unavailable");
-        return;
-      }
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-      camera.position.set(0, 0.35, 8.4);
-
-      const root = new THREE.Group();
-      root.rotation.set(-0.12, -0.2, 0.04);
-      scene.add(root);
-
-      const palette = [0x53e7ff, 0xff6f7d, 0xc8ff67, 0xa985ff, 0x46ffd2];
-      const points = [
-        [-2.55, 0.15, -0.4], [-1.4, 1.65, 0.4], [0.1, 1.05, -0.5],
-        [1.8, 1.75, 0.15], [2.55, 0.05, -0.2], [1.25, -1.25, 0.55],
-        [-0.45, -1.7, -0.15], [-1.85, -1.05, 0.65], [0.15, 0.05, 1.15],
-      ].map(([x, y, z]) => new THREE.Vector3(x, y, z));
-
-      const connections = [
-        [0, 1], [0, 7], [0, 8], [1, 2], [1, 8], [2, 3], [2, 8],
-        [3, 4], [3, 8], [4, 5], [4, 8], [5, 6], [5, 8], [6, 7],
-        [6, 8], [7, 8], [2, 5], [1, 6],
-      ];
-
-      // Curved, depth-separated routes make the mesh spatial rather than a flat graph.
-      const routes = connections.map(([a, b], index) => {
-        const control = points[a].clone().lerp(points[b], 0.5);
-        control.z += (index % 2 ? 1 : -1) * 0.5;
-        const curve = new THREE.QuadraticBezierCurve3(points[a], control, points[b]);
-        const geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(32));
-        const material = new THREE.LineBasicMaterial({
-          color: palette[index % palette.length], transparent: true,
-          opacity: 0.23, blending: THREE.AdditiveBlending, depthWrite: false,
+        plinths.forEach((material, index) => {
+          material.emissive.copy(accent);
+          material.emissiveIntensity = index === hovered ? 0.35 : index === route.from || index === route.to ? 0.14 : 0;
         });
-        root.add(new THREE.Line(geometry, material));
-        return curve;
-      });
-
-      const nodeGeometry = new THREE.IcosahedronGeometry(0.18, 1);
-      const coreGeometry = new THREE.IcosahedronGeometry(0.47, 2);
-      const haloGeometry = new THREE.IcosahedronGeometry(0.69, 1);
-      const nodes: InstanceType<typeof THREE.Mesh>[] = [];
-
-      points.forEach((position, index) => {
-        const color = palette[index % palette.length];
-        const material = new THREE.MeshStandardMaterial({
-          color,
-          emissive: color,
-          emissiveIntensity: index === 8 ? 1.1 : 0.65,
-          roughness: 0.28,
-          metalness: 0.5,
+        route.curve.getPoint((elapsed * 0.36) % 1, packet.position);
+        route.curve.getPoint(0.78, arrow.position);
+        arrow.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), route.direction);
+        board.updateMatrixWorld(true);
+        camera.updateMatrixWorld(true);
+        const positions = anchors.map((anchor) => {
+          const projected = board.localToWorld(anchor.clone()).project(camera);
+          return { x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 };
         });
-        const node = new THREE.Mesh(index === 8 ? coreGeometry : nodeGeometry, material);
-        node.position.copy(position);
-        root.add(node);
-        nodes.push(node);
-      });
-
-      const halo = new THREE.Mesh(
-        haloGeometry,
-        new THREE.MeshBasicMaterial({ color: 0x53e7ff, wireframe: true, transparent: true, opacity: 0.22 }),
-      );
-      halo.position.copy(points[8]);
-      root.add(halo);
-
-      const orbitGeometry = new THREE.TorusGeometry(2.85, 0.007, 4, 120);
-      const orbits = [0, 1, 2].map((index) => {
-        const orbit = new THREE.Mesh(orbitGeometry, new THREE.MeshBasicMaterial({
-          color: palette[index === 2 ? 3 : index], transparent: true,
-          opacity: 0.17, depthWrite: false,
-        }));
-        orbit.rotation.set(0.65 + index * 0.64, index * 0.7, index * 0.3);
-        root.add(orbit);
-        return orbit;
-      });
-
-      const particleGeometry = new THREE.SphereGeometry(0.045, 8, 8);
-      const particles = routes.map((curve, index) => {
-        const material = new THREE.MeshBasicMaterial({ color: palette[index % palette.length] });
-        const mesh = new THREE.Mesh(particleGeometry, material);
-        root.add(mesh);
-        return { mesh, curve, offset: index / connections.length };
-      });
-
-      const dustGeometry = new THREE.BufferGeometry();
-      const dustPositions = new Float32Array(270);
-      for (let i = 0; i < dustPositions.length; i += 3) {
-        dustPositions[i] = (Math.random() - 0.5) * 7.5;
-        dustPositions[i + 1] = (Math.random() - 0.5) * 5.4;
-        dustPositions[i + 2] = (Math.random() - 0.5) * 3.5;
-      }
-      dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
-      const dustMaterial = new THREE.PointsMaterial({ color: 0x9eeeff, size: 0.018, transparent: true, opacity: 0.5 });
-      root.add(new THREE.Points(dustGeometry, dustMaterial));
-
-      scene.add(new THREE.AmbientLight(0x9bb3c6, 0.85));
-      const light = new THREE.PointLight(0x53e7ff, 18, 16);
-      light.position.set(1.5, 2.5, 4);
-      scene.add(light);
-      const coralLight = new THREE.PointLight(0xff6f7d, 12, 12);
-      coralLight.position.set(-3, -2, 2);
-      scene.add(coralLight);
-
-      const pointer = { x: 0, y: 0 };
+        const projectionKey = positions.map((point) => `${point.x.toFixed(4)},${point.y.toFixed(4)}`).join(";");
+        if (projectionKey !== previousProjection) { previousProjection = projectionKey; live.current.onProject(positions); }
+        renderer.render(scene, camera);
+        if (!live.current.paused) frame = requestAnimationFrame(draw);
+      };
+      const requestDraw = () => { cancelAnimationFrame(frame); last = 0; frame = requestAnimationFrame(draw); };
+      refresh.current = requestDraw;
       const resize = () => {
         const { width, height } = canvas.getBoundingClientRect();
         if (!width || !height) return;
-        const dprCap = width < 640 ? 1.25 : 1.6;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, width < 640 ? 1.25 : 1.6));
         renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.position.z = Math.max(8.4, 6.7 / camera.aspect);
-        camera.updateProjectionMatrix();
+        const aspect = width / height;
+        const halfHeight = Math.max(3.25, 4.8 / aspect);
+        camera.left = -halfHeight * aspect; camera.right = halfHeight * aspect;
+        camera.top = halfHeight; camera.bottom = -halfHeight;
+        camera.updateProjectionMatrix(); requestDraw();
       };
-      const onPointerMove = (event: PointerEvent) => {
+      const hitNode = (event: PointerEvent | MouseEvent) => {
         const rect = canvas.getBoundingClientRect();
-        pointer.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-        pointer.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+        pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
+        raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObjects(nodeGroups, true)[0];
+        let object: InstanceType<typeof T.Object3D> | undefined = hit?.object;
+        while (object && object.userData.nodeIndex === undefined) object = object.parent ?? undefined;
+        return object?.userData.nodeIndex as number | undefined;
       };
-      const onPointerLeave = () => { pointer.x = 0; pointer.y = 0; };
-      let previousTime = 0;
-      let elapsed = 0;
-      const render = (time: number) => {
-        if (disposed || contextLost || !visible || !pageVisible) return;
-        const delta = previousTime ? Math.min((time - previousTime) / 1000, 0.05) : 0;
-        previousTime = time;
-        elapsed += delta;
-        const t = elapsed * 0.35;
-        const ease = 1 - Math.exp(-delta * 3);
-        root.rotation.y += (pointer.x * 0.2 + Math.sin(t * 0.35) * 0.3 - 0.2 - root.rotation.y) * ease;
-        root.rotation.x += (-pointer.y * 0.12 - 0.12 - root.rotation.x) * ease;
-        nodes.forEach((node, index) => {
-          const pulse = 1 + Math.sin(t * 5 + index) * 0.08;
-          node.scale.setScalar(pulse);
-          node.rotation.x += delta * 0.24;
-          node.rotation.y += delta * 0.36;
-        });
-        halo.rotation.x -= delta * 0.18;
-        halo.rotation.y += delta * 0.3;
-        orbits.forEach((orbit, index) => { orbit.rotation.z += delta * (index % 2 ? -0.04 : 0.03); });
-        particles.forEach(({ mesh, curve, offset }, index) => {
-          const progress = (t * (0.65 + (index % 4) * 0.08) + offset) % 1;
-          curve.getPoint(progress, mesh.position);
-          mesh.scale.setScalar(0.6 + Math.sin(progress * Math.PI) * 0.65);
-        });
-        renderer.render(scene, camera);
-        frame = requestAnimationFrame(render);
+      const move = (event: PointerEvent) => {
+        hovered = hitNode(event) ?? -1;
+        targetRotation = Math.max(-1, Math.min(1, pointer.x)) * 0.025;
+        canvas.style.cursor = hovered >= 0 ? "pointer" : "default";
+        if (live.current.paused) requestDraw();
       };
-      const resume = () => {
-        cancelAnimationFrame(frame);
-        previousTime = 0;
-        if (!contextLost && visible && pageVisible) frame = requestAnimationFrame(render);
-      };
-      const onVisibility = () => {
-        pageVisible = !document.hidden;
-        resume();
-      };
-      const intersection = new IntersectionObserver(([entry]) => {
-        visible = entry.isIntersecting;
-        resume();
-      }, { threshold: 0 });
-      const resizeObserver = new ResizeObserver(resize);
-
-      intersection.observe(canvas);
-      resizeObserver.observe(canvas);
-      document.addEventListener("visibilitychange", onVisibility);
-      canvas.addEventListener("pointermove", onPointerMove, { passive: true });
-      canvas.addEventListener("pointerleave", onPointerLeave);
-      resize();
-      renderer.render(scene, camera);
-      onStatus("ready");
-      resume();
-
-      const onContextLost = (event: Event) => {
-        event.preventDefault();
-        cancelAnimationFrame(frame);
-        contextLost = true;
-        onStatus("unavailable");
-      };
-      const onContextRestored = () => {
-        contextLost = false;
-        resize();
-        renderer.render(scene, camera);
-        onStatus("ready");
-        resume();
-      };
-      canvas.addEventListener("webglcontextlost", onContextLost);
-      canvas.addEventListener("webglcontextrestored", onContextRestored);
-
+      const leave = () => { hovered = -1; targetRotation = 0; canvas.style.cursor = "default"; requestDraw(); };
+      const click = (event: MouseEvent) => { const index = hitNode(event); if (index !== undefined) live.current.onSelectNode(index); };
+      const visibility = () => { cancelAnimationFrame(frame); requestDraw(); };
+      const contextLost = (event: Event) => { event.preventDefault(); lost = true; cancelAnimationFrame(frame); live.current.onStatus("unavailable"); };
+      const contextRestored = () => { lost = false; previousProjection = ""; resize(); live.current.onStatus("ready"); };
+      const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; requestDraw(); });
+      const observer = new ResizeObserver(resize);
+      intersection.observe(canvas); observer.observe(canvas);
+      canvas.addEventListener("pointermove", move, { passive: true });
+      canvas.addEventListener("pointerleave", leave);
+      canvas.addEventListener("click", click);
+      canvas.addEventListener("webglcontextlost", contextLost);
+      canvas.addEventListener("webglcontextrestored", contextRestored);
+      document.addEventListener("visibilitychange", visibility);
       cleanup = () => {
-        cancelAnimationFrame(frame);
-        intersection.disconnect();
-        resizeObserver.disconnect();
-        document.removeEventListener("visibilitychange", onVisibility);
-        canvas.removeEventListener("pointermove", onPointerMove);
-        canvas.removeEventListener("pointerleave", onPointerLeave);
-        canvas.removeEventListener("webglcontextlost", onContextLost);
-        canvas.removeEventListener("webglcontextrestored", onContextRestored);
-        const geometries = new Set<InstanceType<typeof THREE.BufferGeometry>>();
-        const materials = new Set<InstanceType<typeof THREE.Material>>();
-        scene.traverse((object) => {
-          if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
-            geometries.add(object.geometry);
-            const ownedMaterials = Array.isArray(object.material) ? object.material : [object.material];
-            ownedMaterials.forEach((material) => materials.add(material));
-          }
-        });
-        geometries.forEach((geometry) => geometry.dispose());
-        materials.forEach((material) => material.dispose());
-        renderer.dispose();
-        renderer.forceContextLoss();
+        cancelAnimationFrame(frame); refresh.current = () => {};
+        intersection.disconnect(); observer.disconnect();
+        canvas.removeEventListener("pointermove", move); canvas.removeEventListener("pointerleave", leave); canvas.removeEventListener("click", click);
+        canvas.removeEventListener("webglcontextlost", contextLost); canvas.removeEventListener("webglcontextrestored", contextRestored);
+        document.removeEventListener("visibilitychange", visibility);
+        const geometries = new Set<InstanceType<typeof T.BufferGeometry>>();
+        const materials = new Set<InstanceType<typeof T.Material>>([body, dark, trim, screen]);
+        scene.traverse((object) => { if (object instanceof T.Mesh) { geometries.add(object.geometry); (Array.isArray(object.material) ? object.material : [object.material]).forEach((material) => materials.add(material)); } });
+        geometries.forEach((geometry) => geometry.dispose()); materials.forEach((material) => material.dispose());
+        renderer.dispose(); renderer.forceContextLoss();
       };
-    }).catch(() => { if (!disposed) onStatus("unavailable"); });
-
-    return () => {
-      disposed = true;
-      cleanup();
-    };
-  }, [onStatus]);
+      resize(); live.current.onStatus("ready");
+    }).catch(() => { if (!disposed) { cleanup(); live.current.onStatus("unavailable"); } });
+    return () => { disposed = true; cleanup(); };
+  }, [props.story]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 size-full" aria-hidden="true" />;
 }

@@ -45,7 +45,7 @@ function ProjectPanel({ project, index }: { project: Project; index: number }) {
 
   return (
     <Reveal>
-      <article className="project-chapter group relative overflow-hidden rounded-card border border-line bg-surface/40 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-line-strong sm:p-8">
+      <article id={`project-${index+1}`} className="project-chapter group relative scroll-mt-24 overflow-hidden rounded-card border border-line bg-surface/40 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-line-strong sm:p-8">
         <div
           className="absolute inset-x-0 top-0 h-0.5"
           style={{ backgroundImage: `linear-gradient(90deg, ${color}, transparent)` }}

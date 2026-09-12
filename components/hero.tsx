@@ -14,7 +14,7 @@ export function Hero() {
     <section id="top" className="hero-shell relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24">
       <div className="hero-aurora" aria-hidden="true" />
       <Container className="relative max-w-[1320px]">
-        <div className="grid items-center gap-12 lg:min-h-[660px] lg:grid-cols-[minmax(0,.94fr)_minmax(430px,1.06fr)] lg:gap-8">
+        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(460px,1.15fr)] lg:gap-12">
           <div>
             <Reveal>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-muted">
@@ -30,8 +30,8 @@ export function Hero() {
             </Reveal>
 
             <Reveal delay={0.05}>
-              <p className="mt-12 font-mono text-xs tracking-[0.16em] text-faint">BE TUAN MINH / SENIOR BACKEND ENGINEER</p>
-              <h1 className="hero-title mt-5 max-w-[11ch] text-[clamp(3.6rem,7.4vw,7.4rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-fg">
+              <p className="mt-12 font-mono text-xs tracking-[0.16em] text-faint">{resume.name.toUpperCase()} / {resume.role.toUpperCase()}</p>
+              <h1 className="hero-title mt-5 max-w-[11ch] text-[clamp(3.6rem,7vw,7rem)] font-semibold leading-[0.9] tracking-[-0.075em] text-fg">
                 Systems that <span className="text-gradient">hold up.</span>
               </h1>
             </Reveal>
@@ -57,12 +57,12 @@ export function Hero() {
             </Reveal>
           </div>
 
-          <Reveal delay={0.12} className="relative min-w-0">
+          <div className="relative min-w-0">
             <NetworkVisual />
-          </Reveal>
+          </div>
         </div>
 
-        <a href="#impact" aria-label="Continue to impact metrics" className="mt-10 inline-flex items-center gap-2 font-mono text-[11px] tracking-wider text-faint transition-colors hover:text-fg lg:mt-0">
+        <a href="#impact" aria-label="Continue to impact metrics" className="mt-10 inline-flex items-center gap-2 font-mono text-[11px] tracking-wider text-faint transition-colors hover:text-fg">
           <IconArrowDown className="size-4" stroke={1.5} />
           SELECTED IMPACT
         </a>

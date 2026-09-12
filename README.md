@@ -16,6 +16,17 @@ npx tsc --noEmit # TypeScript verification
 python3 -m http.server 3000 --directory out # serve the static export
 ```
 
+For the workflow explorer checks (build with the Pages subpath first):
+
+```bash
+PAGES_BASE_PATH=/portfolio npm run build
+node --test tests/system-explorer.test.cjs
+```
+
+The Node tests exercise the actual canvas lifecycle with a renderer test double,
+graph integrity, public-content references and static-export links. They do not
+replace a browser check of pixels, WebGL availability or CSS interactions.
+
 ## Update your content (the only file you normally touch)
 
 All text on the site comes from a single source of truth:
@@ -51,8 +62,8 @@ app/
 components/
   nav, hero, impact, focus-areas, experience, projects,
   skills, education, contact, footer
-  network-visual         # accessible static service-mesh fallback
-  service-mesh-canvas    # lazy Three.js service mesh
+  network-visual         # native workflow/step controls and accessible diagrams
+  service-mesh-canvas    # lazy Three.js architecture board
   reveal                 # scroll-reveal motion wrapper
 public/BeTuanMinh_Resume.pdf   # served by the Download CV button
 ```
@@ -68,8 +79,14 @@ public/BeTuanMinh_Resume.pdf   # served by the Download CV button
 - **Motion respects `prefers-reduced-motion`** and collapses to static.
 - **Three.js is lazy-loaded**, DPR-capped, paused offscreen/in hidden tabs, and
   replaced by a static fallback for reduced-motion, save-data, or no WebGL.
-- The hero mesh is a conceptual illustration, not production telemetry or a
-  claim about any employer's exact infrastructure.
+- The hero explains SSO, ranking, and event-driven workflows with directed
+  paths, named components and step-by-step descriptions. `content/system-stories.ts`
+  shares the data between the SVG fallback, HTML controls and Three.js board.
+  Career contributions are read directly from `resume.ts`; the walkthroughs are
+  conceptual examples, not an employer's exact infrastructure.
+- Native radio controls and CSS keep workflow and step selection usable without
+  JavaScript. Keyboard users can select steps; pointer users can also inspect
+  labeled models. Animation has an explicit pause/resume control.
 - All content is visible in server-rendered HTML. Scroll reveals progressively
   enhance it after hydration; the mobile menu uses native `details` / `summary`.
 - **Tech logos** load from Simple Icons (`cdn.simpleicons.org`) at runtime.
