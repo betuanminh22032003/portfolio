@@ -1,9 +1,7 @@
 # Be Tuan Minh — Portfolio
 
-Dark-tech portfolio for a Backend / Distributed Systems engineer, built with
-**Next.js (App Router) + Tailwind v4 + Motion**. Design discipline enforced by
-the [taste-skill](https://www.tasteskill.dev/) anti-slop framework
-(`.agents/skills/`).
+Interactive portfolio for a Senior Backend / Distributed Systems engineer,
+built with **Next.js (App Router) + Tailwind v4 + Motion + Three.js**.
 
 ## Run locally
 
@@ -13,8 +11,9 @@ npm run dev      # http://localhost:3000
 ```
 
 ```bash
-npm run build    # production build
-npm start        # serve the production build
+npm run build    # production static export into out/
+npx tsc --noEmit # TypeScript verification
+python3 -m http.server 3000 --directory out # serve the static export
 ```
 
 ## Update your content (the only file you normally touch)
@@ -48,24 +47,31 @@ content/resume.ts        # ← your CV data (edit here)
 app/
   layout.tsx             # fonts, metadata / SEO
   page.tsx               # section composition
-  globals.css            # design tokens (dark-tech, emerald accent)
+  globals.css            # graphite surfaces and intentional category accents
 components/
   nav, hero, impact, focus-areas, experience, projects,
   skills, education, contact, footer
-  architecture-diagram   # the CQRS / event-driven hero visual
+  network-visual         # accessible static service-mesh fallback
+  service-mesh-canvas    # lazy Three.js service mesh
   reveal                 # scroll-reveal motion wrapper
 public/BeTuanMinh_Resume.pdf   # served by the Download CV button
 ```
 
 ## Design notes
 
-- **Dark theme, five-color accent palette** (cyan / pink / lime / orange / violet)
+- **Graphite theme, five-color accent palette** (cyan / coral / lime / orange / violet)
   defined in `lib/accents.ts`. Each metric, focus area, project, experience, and
   skill group carries an `accent` field in `content/resume.ts` that colors its
   icon / number / tag. The primary action color (buttons, links) is cyan via
   `--color-accent` in `app/globals.css`.
 - **Icons** come from `@tabler/icons-react` (props: `stroke`, `size`, `className`).
 - **Motion respects `prefers-reduced-motion`** and collapses to static.
+- **Three.js is lazy-loaded**, DPR-capped, paused offscreen/in hidden tabs, and
+  replaced by a static fallback for reduced-motion, save-data, or no WebGL.
+- The hero mesh is a conceptual illustration, not production telemetry or a
+  claim about any employer's exact infrastructure.
+- All content is visible in server-rendered HTML. Scroll reveals progressively
+  enhance it after hydration; the mobile menu uses native `details` / `summary`.
 - **Tech logos** load from Simple Icons (`cdn.simpleicons.org`) at runtime.
 
 ## Deploy

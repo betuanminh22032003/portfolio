@@ -21,7 +21,7 @@ export function Experience() {
             const color = ACCENTS[job.accent];
             return (
               <Reveal key={job.company}>
-                <div className="grid gap-8 md:grid-cols-12">
+                <div className="experience-row grid gap-8 md:grid-cols-12">
                   {/* meta */}
                   <div className="md:col-span-4">
                     <h3 className="text-xl font-semibold tracking-tight text-fg">

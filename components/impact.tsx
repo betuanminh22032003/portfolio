@@ -1,4 +1,5 @@
 import { resume } from "@/content/resume";
+import { ACCENTS } from "@/lib/accents";
 import { Container } from "./section";
 import { Reveal } from "./reveal";
 
@@ -14,7 +15,7 @@ export function Impact() {
               delay={i * 0.06}
               className="sm:border-l sm:border-line sm:pl-6 sm:first:border-l-0 sm:first:pl-0"
             >
-              <dt className="font-mono text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+              <dt className="font-mono text-[clamp(1.3rem,3vw,2.25rem)] font-semibold tracking-tight" style={{ color: ACCENTS[m.accent] }}>
                 {m.value}
               </dt>
               <dd className="mt-2 text-sm text-fg">{m.label}</dd>
@@ -24,6 +25,7 @@ export function Impact() {
             </Reveal>
           ))}
         </dl>
+        <p className="mt-6 text-xs leading-relaxed text-muted">Platform scale provides context for the work; individual responsibilities and outcomes are detailed below.</p>
       </Container>
     </section>
   );
