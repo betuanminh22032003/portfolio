@@ -7,13 +7,14 @@ import {
 import { resume } from "@/content/resume";
 import { Container } from "./section";
 import { Reveal } from "./reveal";
+import { NetworkVisual } from "./network-visual";
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-      <div className="hero-orbit" aria-hidden="true" />
+    <section id="top" className="hero-shell relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24">
+      <div className="hero-aurora" aria-hidden="true" />
       <Container className="relative max-w-[1320px]">
-        <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end lg:gap-20">
+        <div className="grid items-center gap-12 lg:min-h-[660px] lg:grid-cols-[minmax(0,.94fr)_minmax(430px,1.06fr)] lg:gap-8">
           <div>
             <Reveal>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-muted">
@@ -29,14 +30,14 @@ export function Hero() {
             </Reveal>
 
             <Reveal delay={0.05}>
-              <p className="mt-14 font-mono text-xs tracking-[0.16em] text-faint">BE TUAN MINH / BACKEND ENGINEER</p>
-              <h1 className="mt-5 max-w-[12ch] text-[clamp(3.9rem,9vw,8.6rem)] font-semibold leading-[0.84] tracking-[-0.075em] text-fg">
-                Systems that hold up.
+              <p className="mt-12 font-mono text-xs tracking-[0.16em] text-faint">BE TUAN MINH / SENIOR BACKEND ENGINEER</p>
+              <h1 className="hero-title mt-5 max-w-[11ch] text-[clamp(3.6rem,7.4vw,7.4rem)] font-semibold leading-[0.86] tracking-[-0.075em] text-fg">
+                Systems that <span className="text-gradient">hold up.</span>
               </h1>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <p className="mt-8 max-w-[58ch] text-lg leading-[1.65] text-muted sm:text-xl">
+              <p className="mt-8 max-w-[55ch] text-lg leading-[1.65] text-muted sm:text-xl">
                 I design and modernize <strong className="font-medium text-fg">.NET platforms</strong> for identity,
                 learning, and real-time assessment—built for heavy traffic, clear operations, and safe change.
               </p>
@@ -56,26 +57,12 @@ export function Hero() {
             </Reveal>
           </div>
 
-          <Reveal delay={0.18} className="lg:pb-1">
-            <aside className="border-t border-line-strong pt-6" aria-label="Professional profile">
-              <p className="font-mono text-[11px] tracking-[0.14em] text-faint">CURRENTLY</p>
-              <p className="mt-2 text-lg font-medium tracking-tight text-fg">{resume.current}</p>
-              <p className="mt-6 text-[15px] leading-7 text-muted">{resume.summary}</p>
-              <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6">
-                <div>
-                  <dt className="font-mono text-[11px] tracking-wider text-faint">EXPERIENCE</dt>
-                  <dd className="mt-2 text-2xl font-semibold tracking-tight text-fg">5+ years</dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-[11px] tracking-wider text-faint">SPECIALTY</dt>
-                  <dd className="mt-2 text-sm font-medium leading-6 text-fg">Distributed systems</dd>
-                </div>
-              </dl>
-            </aside>
+          <Reveal delay={0.12} className="relative min-w-0">
+            <NetworkVisual />
           </Reveal>
         </div>
 
-        <a href="#impact" aria-label="Continue to impact metrics" className="mt-20 inline-flex items-center gap-2 font-mono text-[11px] tracking-wider text-faint transition-colors hover:text-fg">
+        <a href="#impact" aria-label="Continue to impact metrics" className="mt-10 inline-flex items-center gap-2 font-mono text-[11px] tracking-wider text-faint transition-colors hover:text-fg lg:mt-0">
           <IconArrowDown className="size-4" stroke={1.5} />
           SELECTED IMPACT
         </a>

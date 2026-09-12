@@ -10,6 +10,7 @@ function ProjectPanel({ project, index }: { project: Project; index: number }) {
 
   const details = (
     <div className="md:col-span-7">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[.14em] text-muted">Responsibilities & outcomes</p>
       <ul className="space-y-3">
         {project.bullets.map((b) => (
           <li key={b} className="flex gap-3">
@@ -27,6 +28,7 @@ function ProjectPanel({ project, index }: { project: Project; index: number }) {
 
   const aside = (
     <div className="md:col-span-5">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[.14em] text-muted">System context</p>
       <p className="text-[15px] leading-relaxed text-muted">{project.summary}</p>
       <ul className="mt-6 flex flex-wrap gap-1.5">
         {project.stack.map((t) => (
@@ -43,14 +45,15 @@ function ProjectPanel({ project, index }: { project: Project; index: number }) {
 
   return (
     <Reveal>
-      <article className="relative overflow-hidden rounded-card border border-line bg-surface/40 p-6 transition-colors hover:border-line-strong sm:p-8">
+      <article className="project-chapter group relative overflow-hidden rounded-card border border-line bg-surface/40 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-line-strong sm:p-8">
         <div
           className="absolute inset-x-0 top-0 h-0.5"
           style={{ backgroundImage: `linear-gradient(90deg, ${color}, transparent)` }}
         />
 
         {/* header */}
-        <div className="flex flex-wrap items-start justify-between gap-6 border-b border-line pb-6">
+        <span className="chapter-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+        <div className="relative flex flex-wrap items-start justify-between gap-6 border-b border-line pb-6">
           <div>
             <p className="font-mono text-xs text-faint">
               {String(index + 1).padStart(2, "0")} · {project.owner}
